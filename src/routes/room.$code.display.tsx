@@ -116,8 +116,8 @@ function Board({ standings, reduced }: { standings: Standing[]; reduced: boolean
         found[s.id] = { dir: now < before ? "up" : "down", places: Math.abs(now - before) };
       }
       const leader = standings[0];
-      const leaderBefore = prev.get(leader.id);
-      if (leaderBefore !== undefined && leaderBefore !== 0) setPulse(leader.id + ":" + Date.now());
+      const leaderBefore = leader ? prev.get(leader.id) : undefined;
+      if (leader && leaderBefore !== undefined && leaderBefore !== 0) setPulse(leader.id + ":" + Date.now());
       if (Object.keys(found).length) {
         setMoves((m) => ({ ...m, ...found }));
         const ids = Object.keys(found);
