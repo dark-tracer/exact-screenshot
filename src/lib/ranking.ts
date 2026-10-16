@@ -64,7 +64,8 @@ export function computeStandings(
       b.total - a.total || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
   );
   rows.forEach((r, i) => {
-    r.rank = i > 0 && rows[i - 1].total === r.total ? rows[i - 1].rank : i + 1;
+    const p = rows[i - 1];
+    r.rank = p && p.total === r.total ? p.rank : i + 1;
   });
   return rows;
 }

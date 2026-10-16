@@ -31,7 +31,7 @@ async function hashPin(pin: string) {
   return `pbkdf2$${toHex(salt)}$${await pbkdf2(pin, salt)}`;
 }
 async function checkPin(pin: string, stored: string) {
-  const [, salt, hash] = stored.split("$");
+  const [, salt = "", hash = ""] = stored.split("$");
   const got = await pbkdf2(pin, fromHex(salt));
   let diff = got.length ^ hash.length;
   for (let i = 0; i < Math.min(got.length, hash.length); i++) diff |= got.charCodeAt(i) ^ hash.charCodeAt(i);
@@ -109,7 +109,7 @@ export const createRoom = createServerFn({ method: "POST" })
       const db = await admin();
       const pin_hash = await hashPin(data.pin);
       for (let i = 0; i < 8; i++) {
-        const code = generateRoomCode(() => crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32);
+        const code = generateRoomCode(() => crypto.getRandomValues(new Uint32Array(1))[0]! / 2 ** 32);
         const { data: room, error } = await db.from("rooms").insert({ code, title, pin_hash }).select("id, code").single();
         if (error?.code === "23505") continue;
         if (error) throw error;

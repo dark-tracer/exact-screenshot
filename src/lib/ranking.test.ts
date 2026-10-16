@@ -22,9 +22,9 @@ describe("ranking", () => {
       { id: "2", round_id: "r2", contestant_id: "a", value: 4 },
     ];
     const s = computeStandings([c("a", "A"), c("b", "B")], rounds, scores);
-    expect(s[0].total).toBe(7);
-    expect(s[1].total).toBe(0);
-    expect(s[0].lastRound).toBe(4);
+    expect(s[0]!.total).toBe(7);
+    expect(s[1]!.total).toBe(0);
+    expect(s[0]!.lastRound).toBe(4);
   });
 });
 

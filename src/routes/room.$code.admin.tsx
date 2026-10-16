@@ -68,7 +68,7 @@ function AdminPage() {
   );
 }
 
-function PinGate({ code, title, onToken }: { code: string; title?: string; onToken: (t: string) => void }) {
+function PinGate({ code, title, onToken }: { code: string; title?: string | undefined; onToken: (t: string) => void }) {
   const verify = useServerFn(verifyPin);
   const [pin, setPin] = useState("");
   const [err, setErr] = useState<string | null>(null);
