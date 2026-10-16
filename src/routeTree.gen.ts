@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RoomCodeDisplayRouteImport } from './routes/room.$code.display'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RoomCodeDisplayRoute = RoomCodeDisplayRouteImport.update({
+  id: '/room/$code/display',
+  path: '/room/$code/display',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/room/$code/display': typeof RoomCodeDisplayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/room/$code/display': typeof RoomCodeDisplayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/room/$code/display': typeof RoomCodeDisplayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/room/$code/display'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/room/$code/display'
+  id: '__root__' | '/' | '/room/$code/display'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RoomCodeDisplayRoute: typeof RoomCodeDisplayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/room/$code/display': {
+      id: '/room/$code/display'
+      path: '/room/$code/display'
+      fullPath: '/room/$code/display'
+      preLoaderRoute: typeof RoomCodeDisplayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RoomCodeDisplayRoute: RoomCodeDisplayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
