@@ -14,7 +14,178 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admin_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          room_id: string
+          token_hash: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          room_id: string
+          token_hash: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          room_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_sessions_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contestants: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          room_id: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          room_id: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          room_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contestants_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          code: string
+          created_at: string
+          failed_attempts: number
+          id: string
+          locked_until: string | null
+          pin_hash: string
+          title: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          failed_attempts?: number
+          id?: string
+          locked_until?: string | null
+          pin_hash: string
+          title: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          failed_attempts?: number
+          id?: string
+          locked_until?: string | null
+          pin_hash?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      rounds: {
+        Row: {
+          created_at: string
+          id: string
+          number: number
+          room_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          number: number
+          room_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          number?: number
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rounds_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scores: {
+        Row: {
+          contestant_id: string
+          id: string
+          room_id: string
+          round_id: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          contestant_id: string
+          id?: string
+          room_id: string
+          round_id: string
+          updated_at?: string
+          value: number
+        }
+        Update: {
+          contestant_id?: string
+          id?: string
+          room_id?: string
+          round_id?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scores_contestant_id_fkey"
+            columns: ["contestant_id"]
+            isOneToOne: false
+            referencedRelation: "contestants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
