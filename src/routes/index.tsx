@@ -5,6 +5,7 @@ import { ArrowRight, Monitor, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { createRoom } from "@/lib/scoreboard.functions";
 import { adminToken } from "@/lib/use-room";
 import { normalizeCode, validatePin } from "@/lib/ranking";
@@ -28,6 +29,8 @@ function Index() {
   const create = useServerFn(createRoom);
   const [title, setTitle] = useState("");
   const [pin, setPin] = useState("");
+  const [timerEnabled, setTimerEnabled] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState("30");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [code, setCode] = useState("");
@@ -40,7 +43,7 @@ function Index() {
     const pe = validatePin(pin);
     if (pe) return setErr(pe);
     setBusy(true);
-    const res = await create({ data: { title, pin } });
+    const res = await create({ data: { title, pin, timerEnabled, timerSeconds: Number(timerSeconds) } });
     setBusy(false);
     if (!res.ok) return setErr(res.error);
     adminToken.set(res.data.code, res.data.token);
@@ -82,6 +85,14 @@ function Index() {
               <Input id="pin" type="password" inputMode="numeric" autoComplete="new-password" maxLength={12} value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} placeholder="••••" />
               <p className="text-xs text-muted-foreground">You'll need this PIN to edit scores on another device.</p>
             </div>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="include-timer">Include participant timer</Label>
+              <Switch id="include-timer" checked={timerEnabled} onCheckedChange={setTimerEnabled} />
+            </div>
+            {timerEnabled && <div className="space-y-2">
+              <Label htmlFor="timer-seconds">Seconds per participant</Label>
+              <Input id="timer-seconds" type="number" min={1} max={86400} step={1} value={timerSeconds} onChange={(e) => setTimerSeconds(e.target.value)} />
+            </div>}
             {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
             <Button type="submit" size="lg" className="w-full" disabled={busy}>
               {busy ? "Creating…" : "Create scoreboard"} <ArrowRight />
