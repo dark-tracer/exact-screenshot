@@ -78,6 +78,51 @@ export type Database = {
           },
         ]
       }
+      room_timers: {
+        Row: {
+          contestant_id: string | null
+          duration_seconds: number
+          enabled: boolean
+          ends_at: string | null
+          remaining_ms: number
+          room_id: string
+          run_id: string
+        }
+        Insert: {
+          contestant_id?: string | null
+          duration_seconds?: number
+          enabled?: boolean
+          ends_at?: string | null
+          remaining_ms?: number
+          room_id: string
+          run_id?: string
+        }
+        Update: {
+          contestant_id?: string | null
+          duration_seconds?: number
+          enabled?: boolean
+          ends_at?: string | null
+          remaining_ms?: number
+          room_id?: string
+          run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_timers_contestant_id_fkey"
+            columns: ["contestant_id"]
+            isOneToOne: false
+            referencedRelation: "contestants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_timers_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: true
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rooms: {
         Row: {
           code: string
