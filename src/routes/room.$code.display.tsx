@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
+import { DisplayTimer } from "@/components/DisplayTimer";
 import { RoomNotFound } from "@/components/RoomNotFound";
 import { computeStandings, formatNumber, type Standing } from "@/lib/ranking";
 import { usePrefersReducedMotion, useRoom } from "@/lib/use-room";
@@ -75,12 +76,14 @@ function Display() {
         )}
       </header>
 
+      {state?.timer?.enabled && <DisplayTimer timer={state.timer} name={state.contestants.find((c) => c.id === state.timer?.contestant_id)?.name} />}
+
       {status === "ready" && standings.length === 0 && (
         <div className="flex flex-1 items-center justify-center">
           <p className="animate-pulse font-display text-[5vh] font-semibold text-muted-foreground">Waiting for contestants...</p>
         </div>
       )}
-      {standings.length > 0 && <Board standings={standings} reduced={reduced} />}
+      {standings.length > 0 && <Board standings={standings} reduced={reduced} hasTimer={!!state?.timer?.enabled} />}
 
       {!connected && (
         <div className="pointer-events-none fixed bottom-3 right-4 flex items-center gap-2 rounded-full bg-secondary/80 px-3 py-1 text-sm text-muted-foreground">
@@ -91,11 +94,11 @@ function Display() {
   );
 }
 
-function Board({ standings, reduced }: { standings: Standing[]; reduced: boolean }) {
+function Board({ standings, reduced, hasTimer }: { standings: Standing[]; reduced: boolean; hasTimer: boolean }) {
   const n = standings.length;
   const cols = n > 12 ? 2 : 1;
   const rows = Math.max(Math.ceil(n / cols), 5);
-  const rowH = `min(13vh, calc((85vh - ${rows - 1} * 0.8vh) / ${rows}))`;
+  const rowH = `min(13vh, calc((${hasTimer ? 67 : 85}vh - ${rows - 1} * 0.8vh) / ${rows}))`;
 
   const els = useRef(new Map<string, HTMLLIElement>());
   const prevRects = useRef(new Map<string, DOMRect>());
@@ -154,7 +157,7 @@ function Board({ standings, reduced }: { standings: Standing[]; reduced: boolean
 
   return (
     <ol
-      className="grid min-h-0 flex-1 gap-x-[2vw] gap-y-[0.8vh]"
+      className={`grid min-h-0 flex-1 gap-x-[2vw] gap-y-[0.8vh] ${hasTimer ? "pt-[1vh]" : ""}`}
       style={{
         gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
         gridTemplateRows: `repeat(${rows}, ${rowH})`,

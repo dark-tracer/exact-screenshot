@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { timerTransition, validDuration, type TimerAction } from "./timer";
 import {
   generateRoomCode,
   normalizeCode,
@@ -99,13 +100,15 @@ async function existingNames(roomId: string) {
 }
 
 export const createRoom = createServerFn({ method: "POST" })
-  .inputValidator((d: { title: string; pin: string }) => d)
+  .inputValidator((d: { title: string; pin: string; timerEnabled?: boolean; timerSeconds?: number }) => d)
   .handler(({ data }) =>
     guarded(async () => {
       const title = String(data.title ?? "").trim().slice(0, 80);
       if (!title) fail("Please give your scoreboard a title");
       const pinErr = validatePin(String(data.pin ?? ""));
       if (pinErr) fail(pinErr);
+      const seconds = data.timerSeconds ?? 30;
+      if (data.timerEnabled && !validDuration(seconds)) fail("Timer duration must be a whole number from 1 to 86400 seconds.");
       const db = await admin();
       const pin_hash = await hashPin(data.pin);
       for (let i = 0; i < 8; i++) {
@@ -113,6 +116,8 @@ export const createRoom = createServerFn({ method: "POST" })
         const { data: room, error } = await db.from("rooms").insert({ code, title, pin_hash }).select("id, code").single();
         if (error?.code === "23505") continue;
         if (error) throw error;
+        const { error: timerError } = await db.from("room_timers").insert({ room_id: room.id, enabled: data.timerEnabled === true, duration_seconds: data.timerEnabled ? seconds : 30, remaining_ms: (data.timerEnabled ? seconds : 30) * 1000 });
+        if (timerError) throw timerError;
         return { code: room.code, token: await newSession(room.id) };
       }
       return fail("Could not create a room code, please try again");
@@ -277,6 +282,11 @@ export const newGame = createServerFn({ method: "POST" })
     guarded(async () => {
       const roomId = await mustAuth(data);
       const db = await admin();
+      const { data: timer } = await db.from("room_timers").select("duration_seconds").eq("room_id", roomId).maybeSingle();
+      if (timer) {
+        const { error: timerError } = await db.from("room_timers").update({ contestant_id: null, ends_at: null, remaining_ms: timer.duration_seconds * 1000, run_id: crypto.randomUUID() }).eq("room_id", roomId);
+        if (timerError) throw timerError;
+      }
       const { error } = await db.from("rounds").delete().eq("room_id", roomId);
       if (error) throw error;
       if (data.removeContestants === true) {
@@ -286,3 +296,23 @@ export const newGame = createServerFn({ method: "POST" })
       return null;
     }),
   );
+
+export const controlTimer = createServerFn({ method: "POST" })
+  .inputValidator(authInput<{ action: TimerAction; contestantId: string }>)
+  .handler(({ data }) => guarded(async () => {
+    const roomId = await mustAuth(data);
+    if (!["start", "pause", "restart", "reset"].includes(data.action)) return fail("Unknown timer action.");
+    const db = await admin();
+    const { data: timer, error } = await db.from("room_timers").select("*").eq("room_id", roomId).maybeSingle();
+    if (error) throw error;
+    if (!timer?.enabled) return fail("This room does not have a timer enabled.");
+    const { data: contestant } = await db.from("contestants").select("id").eq("id", data.contestantId).eq("room_id", roomId).maybeSingle();
+    if (!contestant) return fail("Please select a participant in this room.");
+    if (data.action !== "restart" && data.action !== "reset" && timer.contestant_id && timer.contestant_id !== contestant.id) return fail("Restart the timer to begin another participant's turn.");
+    let patch;
+    try { patch = timerTransition(timer, data.action, Date.now(), crypto.randomUUID()); }
+    catch (e) { return fail(e instanceof Error ? e.message : "Could not control timer."); }
+    const { error: updateError } = await db.from("room_timers").update({ ...patch, contestant_id: contestant.id }).eq("room_id", roomId);
+    if (updateError) throw updateError;
+    return null;
+  }));

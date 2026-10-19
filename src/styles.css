@@ -128,6 +128,16 @@
 
 .tabular { font-variant-numeric: tabular-nums; }
 
+.timer-expired { font-size: 64px; letter-spacing: 0; }
+.timer-countdown { font-size: 64px; letter-spacing: 0; }
+@media (max-width: 640px), (max-height: 600px) {
+  .timer-expired, .timer-countdown { font-size: 36px; }
+  .display-timer > div > p:first-child { font-size: 14px; }
+}
+@media (max-width: 400px) {
+  .timer-expired { font-size: 28px; }
+}
+
 /* Projector rows */
 .board-row {
   height: var(--row-h);
