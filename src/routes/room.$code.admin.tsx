@@ -12,6 +12,7 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { RoomNotFound } from "@/components/RoomNotFound";
+import { TimerPanel } from "@/components/TimerPanel";
 import {
   addContestant, addRound, checkSession, deleteRound, logoutAdmin, newGame, removeContestant,
   setScore, updateContestant, verifyPin,
@@ -147,6 +148,7 @@ function Admin({ state, code, token, connected, refresh, onExpired }: {
           <RoundsPanel state={state} auth={auth} run={run} />
         </div>
         <aside className="space-y-6">
+          <TimerPanel state={state} auth={auth} refresh={refresh} onExpired={onExpired} />
           <section className="rounded-2xl border border-border bg-card p-5" aria-label="Standings">
             <h2 className="text-xl font-bold">Standings</h2>
             {standings.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">No contestants yet.</p> : (
