@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { formatTime, type RoomTimer } from "@/lib/timer";
 import { useCountdown } from "@/lib/use-countdown";
 
-export function DisplayTimer({ timer, name }: { timer: RoomTimer; name?: string }) {
+export function DisplayTimer({ timer, name }: { timer: RoomTimer; name?: string | undefined }) {
   const { remaining, expired } = useCountdown(timer);
   const audio = useRef<AudioContext | null>(null);
   const sounded = useRef<string | null>(null);
@@ -33,7 +33,7 @@ export function DisplayTimer({ timer, name }: { timer: RoomTimer; name?: string 
     sounded.current = timer.run_id;
     const start = context.currentTime;
     // A bright, decaying bell with several metallic harmonics.
-    for (const [frequency, volume] of [[880, 0.5], [1760, 0.24], [2640, 0.12]]) {
+    for (const [frequency, volume] of [[880, 0.5], [1760, 0.24], [2640, 0.12]] as const) {
       const oscillator = context.createOscillator();
       const gain = context.createGain();
       oscillator.frequency.value = frequency;
